@@ -72,6 +72,10 @@ after
 
 `
 
+exports[`test/run.ts > TAP > run with --coverage-include > must match snapshot 1`] = `
+
+`
+
 exports[`test/run.ts > TAP > save test failures > fix the failure > must match snapshot 1`] = `
 TAP version 14
 1..1

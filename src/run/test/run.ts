@@ -130,6 +130,32 @@ t.test('incomplete coverage', async t => {
   t.matchSnapshot(stdout)
 })
 
+t.test('coverage include pattern', { todo: true }, async t => {
+  // testdirs are excluded by default, so use a different name
+  t.testdirName = t.testdirName.replace(/\.tap[\\\/]fixtures/, 'XXX')
+
+  const cwd = t.testdir({
+    'foo.js': `
+      export const foo = () => 'foo';
+    `,
+    'bar.js': `
+      export const bar = () => 'bar';
+    `,
+    'foo.test.js': `
+      import t from 'tap'
+      import { foo } from './foo.js'
+      t.equal(foo(), 'foo')
+    `,
+    '.taprc': 'jobs: 1\n',
+    '.git': {},
+  })
+  const { code, signal, stdout, stderr } = await run(cwd, ['--coverage-include=**/*.js'])
+  t.equal(code, 1, 'fail because no coverage for bar.js')
+  t.equal(signal, null)
+  t.equal(stderr, '')
+  t.matchSnapshot(stdout)
+})
+
 t.test('run with --before and --after', async t => {
   const cwd = t.testdir({
     // put it in a timeout so that it can potentially
