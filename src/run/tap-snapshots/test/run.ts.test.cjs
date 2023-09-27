@@ -10,6 +10,25 @@ No valid test files found matching "blah.test.js"
 
 `
 
+exports[`test/run.ts > TAP > incomplete coverage > must match snapshot 1`] = `
+TAP version 14
+1..1
+# Subtest: foo.test.js
+    ok 1 - even number
+    1..1
+ok 1 - foo.test.js # time={TIME}
+
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |      75 |    66.66 |     100 |      75 |                   
+ foo.js   |      75 |    66.66 |     100 |      75 | 6-7               
+----------|---------|----------|---------|---------|-------------------
+# { total: 1, pass: 1 }
+# time={TIME}
+
+`
+
 exports[`test/run.ts > TAP > run stdin only > must match snapshot 1`] = `
 TAP version 14
 1..1

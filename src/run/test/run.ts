@@ -101,6 +101,35 @@ ok 1 - raw
   t.match(stdout, /ok [1-3] - raw.test # time=/m, 'raw pass')
 })
 
+t.test('incomplete coverage', async t => {
+  // testdirs are excluded by default, so use a different name
+  t.testdirName = t.testdirName.replace(/\.tap[\\\/]fixtures/, 'XXX')
+
+  const cwd = t.testdir({
+    'foo.js': `
+      export function foo(x) {
+        if (x % 2 === 0) {
+          return 'even'
+        } else {
+          return 'odd'
+        }
+      }
+    `,
+    'foo.test.js': `
+      import t from 'tap'
+      import { foo } from './foo.js'
+      t.equal(foo(42), 'even', 'even number')
+    `,
+    '.taprc': 'jobs: 1\n',
+    '.git': {},
+  })
+  const { code, signal, stdout, stderr } = await run(cwd)
+  t.equal(code, 1, 'fail because incomplete coverage')
+  t.equal(signal, null)
+  t.equal(stderr, '')
+  t.matchSnapshot(stdout)
+})
+
 t.test('run with --before and --after', async t => {
   const cwd = t.testdir({
     // put it in a timeout so that it can potentially
