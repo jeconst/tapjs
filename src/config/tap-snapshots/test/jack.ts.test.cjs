@@ -76,6 +76,11 @@ Object {
     "description": "Print all tap comments to process.stderr",
     "type": "boolean",
   },
+  "coverage-include": Object {
+    "description": "A glob expression pattern indicating files that should be covered. Matching files will be displayed in coverage reports even if they were not loaded by any test.",
+    "multiple": true,
+    "type": "string",
+  },
   "coverage-map": Object {
     "description": String(
       Provide a path to a node module (esm or cjs) that default exports a single function. That function takes a test file as an argument, and returns an array of files to instrument with coverage when that file is run.

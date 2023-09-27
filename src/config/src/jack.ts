@@ -397,6 +397,15 @@ export default jack({
     },
   })
 
+  .optList({
+    'coverage-include': {
+      hint: 'pattern',
+      description: `A glob expression pattern indicating files that should be
+                    covered. Matching files will be displayed in coverage
+                    reports even if they were not loaded by any test.`,
+    },
+  })
+
   .flag({
     'allow-empty-coverage': {
       description: `Suppress the error exit if the test run produces no
