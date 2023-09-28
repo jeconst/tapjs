@@ -54,15 +54,21 @@ export const report = async (
   } catch {}
   /* c8 ignore stop */
 
-  let showFullCoverage = config.get('show-full-coverage')
-  let r = new Report({
+  const showFullCoverage = config.get('show-full-coverage')
+  const coverageIncludePatterns = config.get('coverage-include')
+  const reportArgs = {
     skipFull: !showFullCoverage,
-    // no need to include/exclude, we already did that when we captured
     reporter,
     reportsDirectory: resolve(config.globCwd, '.tap/report'),
     tempDirectory: resolve(config.globCwd, '.tap/coverage'),
     excludeNodeModules: true,
-  })
+    src: [config.globCwd],
+    // `include` is only needed for --coverage-include to show uncovered files
+    include: coverageIncludePatterns,
+    all: !!coverageIncludePatterns,
+  }
+
+  let r = new Report(reportArgs)
 
   // See if we need to generate a text report, or if we should skip it
   // because --show-full-coverage is false and we have full coverage,
@@ -72,13 +78,7 @@ export const report = async (
     const summary = await getSummary(r)
     if (isFullCoverage(summary) || isEmptyCoverage(summary)) {
       if (mainCommand === 'report' && showFullCoverage !== false) {
-        r = new Report({
-          skipFull: false,
-          reporter,
-          reportsDirectory: resolve(config.globCwd, '.tap/report'),
-          tempDirectory: resolve(config.globCwd, '.tap/coverage'),
-          excludeNodeModules: true,
-        })
+        r = new Report({ ...reportArgs, skipFull: false })
       } else {
         // don't show the text report, it's just noise.
         // but make `tap report html --no-show-full-coverage` still

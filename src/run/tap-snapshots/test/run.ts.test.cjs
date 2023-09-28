@@ -72,7 +72,22 @@ after
 
 `
 
-exports[`test/run.ts > TAP > run with --coverage-include > must match snapshot 1`] = `
+exports[`test/run.ts > TAP > coverage include pattern > must match snapshot 1`] = `
+TAP version 14
+1..1
+# Subtest: foo.test.js
+    ok 1 - should be equal
+    1..1
+ok 1 - foo.test.js # time={TIME}
+
+----------|---------|----------|---------|---------|-------------------
+File      | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------|---------|----------|---------|---------|-------------------
+All files |      50 |    66.66 |      50 |      50 |                   
+ bar.js   |       0 |        0 |       0 |       0 | 1-2               
+----------|---------|----------|---------|---------|-------------------
+# { total: 1, pass: 1 }
+# time={TIME}
 
 `
 

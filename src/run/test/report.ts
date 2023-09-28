@@ -41,6 +41,7 @@ class MockConfig {
   showFullCoverage?: boolean
   allowEmptyCoverage?: boolean
   allowIncompleteCoverage?: boolean
+  coverageInclude?: string[]
   constructor(coverageReport: string[] = []) {
     this.#coverageReport = coverageReport
   }
@@ -54,6 +55,8 @@ class MockConfig {
         return this.allowEmptyCoverage
       case 'allow-incomplete-coverage':
         return this.allowIncompleteCoverage
+      case 'coverage-include':
+        return this.coverageInclude
       default:
         throw new Error('should only look up coverage configs')
     }
@@ -87,6 +90,9 @@ class MockReport {
   reportsDirectory: string
   tempDirectory: string
   excludeNodeModules: boolean
+  src: string[] | undefined
+  include: string[] | undefined
+  all: boolean
 
   summary: Summary = summary
 
@@ -95,11 +101,17 @@ class MockReport {
     reportsDirectory,
     tempDirectory,
     excludeNodeModules,
+    src,
+    include,
+    all,
   }: {
     reporter: string[]
     reportsDirectory: string
     tempDirectory: string
     excludeNodeModules: boolean
+    src: string[] | undefined,
+    include: string[] | undefined,
+    all: boolean,
   }) {
     if (!excludeNodeModules) {
       throw new Error('node_modules should always be excluded')
@@ -113,6 +125,9 @@ class MockReport {
     this.reportsDirectory = reportsDirectory
     this.tempDirectory = tempDirectory
     this.excludeNodeModules = excludeNodeModules
+    this.src = src
+    this.include = include
+    this.all = all
   }
 
   async run() {
@@ -130,7 +145,14 @@ class MockReport {
       )
     }
     if (this.reporter.includes('text')) {
-      process.stdout.write('report')
+      if (this.all) {
+        if (!this.src || this.src.length !== 1 || this.src[0] !== globCwd) {
+          throw new Error("report src should be globCwd")
+        }
+        process.stdout.write(`report-all: ${this.include}`)
+      } else {
+        process.stdout.write('report')
+      }
     }
     if (this.reporter.includes('text-summary')) {
       process.stdout.write('summary')
@@ -421,5 +443,32 @@ t.test('not full coverage, allowed', async t => {
   t.equal(openerRan, true)
   t.equal(readFileSync(htmlReport, 'utf8'), 'report')
   t.equal(process.exitCode, 0)
+  process.exitCode = 0
+})
+
+t.test('coverage include pattern', async t => {
+  summary = summary50
+  t.testdir({
+    '.tap': {
+      coverage: { 'file.json': '{}' },
+    },
+  })
+  const comments = t.capture(mockTap, 'comment')
+  const { report } = (await t.mockImport('../dist/esm/report.js', {
+    c8: { Report: MockReport },
+    '@tapjs/core': mockCore,
+  })) as typeof import('../dist/esm/report.js')
+  const config = new MockConfig([])
+  config.coverageInclude = ['**/*.js']
+  const logs = t.capture(console, 'log')
+  await report([], config as unknown as LoadedConfig)
+  t.strictSame(logs.args(), [['report-all: **/*.js']], 'show coverage with --all')
+  t.strictSame(comments.args(), [
+    ['ERROR: incomplete statements coverage (50%)'],
+    ['ERROR: incomplete branches coverage (50%)'],
+    ['ERROR: incomplete functions coverage (0%)'],
+    ['ERROR: incomplete lines coverage (50%)'],
+  ])
+  t.equal(process.exitCode, 1)
   process.exitCode = 0
 })

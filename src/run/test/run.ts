@@ -130,7 +130,7 @@ t.test('incomplete coverage', async t => {
   t.matchSnapshot(stdout)
 })
 
-t.test('coverage include pattern', { todo: true }, async t => {
+t.test('coverage include pattern', async t => {
   // testdirs are excluded by default, so use a different name
   t.testdirName = t.testdirName.replace(/\.tap[\\\/]fixtures/, 'XXX')
 
